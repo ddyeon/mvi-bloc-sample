@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -48,7 +47,7 @@ fun MainScreen(
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         when {
             state.isError -> {
@@ -63,8 +62,8 @@ fun MainScreen(
                 Button(
                     onClick = {
                         onAction(MainAction.ClickButton)
-                    }) {
-
+                    },
+                ) {
                     Text("멤버 불러오기")
                 }
             }
@@ -79,7 +78,8 @@ fun MainScreen(
                             Button(
                                 onClick = {
                                     onAction(MainAction.ClickTab(it))
-                                }) {
+                                },
+                            ) {
                                 Text(it.name)
                             }
                         }
@@ -87,12 +87,14 @@ fun MainScreen(
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                        verticalArrangement = Arrangement.Center,
                     ) {
-                        items(state.members) {
+                        items(state.members) { member ->
                             Row {
-                                Text(it.name, fontSize = 24.sp)
-                                //Toggle
+                                Text(member.name, fontSize = 24.sp)
+                                Toggle(selected = member.liked, onSelectedChange = {
+                                    onAction(MainAction.ClickToggle(member))
+                                })
                             }
                         }
                     }
@@ -100,7 +102,6 @@ fun MainScreen(
             }
         }
     }
-
 }
 
 @Composable
@@ -109,7 +110,7 @@ fun Toggle(
     onSelectedChange: (Boolean) -> Unit,
 ) {
     Button(
-        onClick = { onSelectedChange(selected.not()) }
+        onClick = { onSelectedChange(selected.not()) },
     ) {
         if (selected) {
             Text("좋아요", color = Color.Red)
