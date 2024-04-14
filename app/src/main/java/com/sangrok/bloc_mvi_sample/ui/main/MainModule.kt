@@ -26,12 +26,13 @@ class BlocModule {
 
     @Provides
     fun provideMainBloc(
-        memberRepository: MockRepository
+        memberRepository: MockRepository,
     ): Bloc<MainState, MainAction> {
         return Bloc(
             initialState = MainState.INITIAL_STATE,
-            actionMapper = MainActionMapper(memberRepository)
+            actionMapper = MainActionMapper(memberRepository),
+            actionTransformer = MainActionTransformer(memberRepository),
+
         )
     }
-
 }
