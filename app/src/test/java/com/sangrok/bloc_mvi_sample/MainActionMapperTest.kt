@@ -14,8 +14,6 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 /**
@@ -38,21 +36,21 @@ class MainActionMapperTest {
 
     @Test
     fun `GIVEN 멤버 목록 WHEN 버튼 클릭 시 THEN 멤버 정보를 가져온다`() = runTest {
-        //GIVEN
+        // GIVEN
         val givenState = MainState.INITIAL_STATE.copy(isLoading = true)
         val members = (0..5).map {
             Member(
                 name = "$it",
-                liked = false
+                liked = false,
             )
         }
         whenever(mockRepository.getMembers()).thenReturn(members)
 
-        //WHEN
+        // WHEN
         val action = MainAction.ClickButton
         val actual = mainActionMapper.mapActionToState(action, givenState).last()
 
-        //THEN
+        // THEN
         val expect = givenState.copy(
             members = members,
             isLoading = false,
@@ -67,20 +65,20 @@ class MainActionMapperTest {
             val members = (0..5).map {
                 Member(
                     name = "$it",
-                    liked = false
+                    liked = false,
                 )
             }
             whenever(mockRepository.getMembers()).thenReturn(members)
-            val filteredMembers = when(tab){
-                Tab.EVEN -> members.filterIndexed { index, member ->  index % 2 == 0 }
-                Tab.ODD -> members.filterIndexed { index, member ->  index % 2 == 1 }
+            val filteredMembers = when (tab) {
+                Tab.EVEN -> members.filterIndexed { index, member -> index % 2 == 0 }
+                Tab.ODD -> members.filterIndexed { index, member -> index % 2 == 1 }
             }
 
-            //WHEN
+            // WHEN
             val action = MainAction.ClickTab(tab)
             val actual = mainActionMapper.mapActionToState(action, givenState).last()
 
-            //THEN
+            // THEN
             val expect = givenState.copy(
                 members = filteredMembers,
                 currentTab = tab,
@@ -90,4 +88,36 @@ class MainActionMapperTest {
         }
     }
 
+    @Test
+    fun `GIVEN 클릭된 멤버 WHEN 상태가 업데이트 된다면 THEN 전체 멤버리스트에서 업데이트`() = runTest {
+        val givenState = MainState.INITIAL_STATE.copy(isLoading = true)
+        val clickedMember = Member(
+            name = "0",
+            liked = false,
+        )
+
+        val members = (0..5).map {
+            Member(
+                name = "$it",
+                liked = false,
+            )
+        }
+        whenever(mockRepository.getMembers()).thenReturn(members)
+
+        val index = members.indexOfFirst { it.name == clickedMember.name }
+        val list = members.toMutableList().apply {
+            set(index, clickedMember)
+        }
+
+        // WHEN
+        val action = MainAction.ClickToggle(clickedMember)
+        val actual = mainActionMapper.mapActionToState(action, givenState).last()
+
+        // THEN
+        val expect = givenState.copy(
+            members = list,
+            isLoading = false,
+        )
+        Assert.assertEquals(expect, actual)
+    }
 }
